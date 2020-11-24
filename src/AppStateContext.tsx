@@ -1,17 +1,83 @@
 import React, { createContext, useReducer, useContext } from "react"
+import { nanoid } from "nanoid"
+import {
+  overrideItemAtIndex,
+  findItemIndexById,
+} from "./utils/arrayUtils"
 
-const AppStateContext = createContext<AppStateContextProps>({} as AppStateContextProps)
-
-export const AppStateProvider = ({ children }: React.PropsWithChildren<{}>) => {
-  return (
-    <AppStateContext.Provider value={{ state: appData }}>
-      {children}
-    </AppStateContext.Provider>
-  )
+interface Task {
+  id: string
+  text: string
 }
 
-export const useAppState = () => {
-  return useContext(AppStateContext)
+interface List {
+  id: string
+  text: string
+  tasks: Task[]
+}
+
+export interface AppState {
+  lists: List[]
+}
+
+type Action =
+  | {
+      type: "ADD_LIST"
+      payload: string
+    }
+  | {
+      type: "ADD_TASK"
+      payload: { text: string; listId: string }
+    }
+
+interface AppStateContextProps {
+  state: AppState
+  dispatch: React.Dispatch<Action>
+}
+
+const AppStateContext = createContext<AppStateContextProps>(
+  {} as AppStateContextProps
+)
+
+const appStateReducer = (state: AppState, action: any): AppState => {
+  switch (action.type) {
+    case "ADD_LIST": {
+      return {
+        ...state,
+        lists: [
+          ...state.lists,
+          { id: nanoid(), text: action.payload, tasks: [] }
+        ]
+      }
+    }
+    case "ADD_TASK": {
+      const targetListIndex = findItemIndexById(
+        state.lists,
+        action.payload.listId
+      )
+
+      const targetList = state.lists[targetListIndex]
+
+      const updatedTargetList = {
+        ...targetList,
+        tasks: [
+          ...targetList.tasks,
+          { id: nanoid(), text: action.payload.text }
+        ]
+      }
+      return {
+        ...state,
+        lists: overrideItemAtIndex(
+          state.lists,
+          updatedTargetList,
+          targetListIndex
+        )
+      }
+    }
+    default: {
+      return state
+    }
+  }
 }
 
 const appData: AppState = {
@@ -34,21 +100,16 @@ const appData: AppState = {
   ]
 }
 
-interface Task {
-  id: string
-  text: string
+export const AppStateProvider = ({ children }: React.PropsWithChildren<{}>) => {
+  const [state, dispatch] = useReducer(appStateReducer, appData)
+
+  return (
+    <AppStateContext.Provider value={{ state, dispatch }}>
+      {children}
+    </AppStateContext.Provider>
+  )
 }
 
-interface List {
-  id: string
-  text: string
-  tasks: Task[]
-}
-
-interface AppStateContextProps {
-  state: AppState
-}
-
-export interface AppState {
-  lists: List[]
+export const useAppState = () => {
+  return useContext(AppStateContext)
 }
