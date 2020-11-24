@@ -3,6 +3,7 @@ import { nanoid } from "nanoid"
 import {
   overrideItemAtIndex,
   findItemIndexById,
+  moveItem
 } from "./utils/arrayUtils"
 
 interface Task {
@@ -28,6 +29,13 @@ type Action =
   | {
       type: "ADD_TASK"
       payload: { text: string; listId: string }
+    }
+  | {
+      type: "MOVE_LIST"
+      payload: {
+        dragIndex: number
+        hoverIndex: number
+      }
     }
 
 interface AppStateContextProps {
@@ -72,6 +80,13 @@ const appStateReducer = (state: AppState, action: any): AppState => {
           updatedTargetList,
           targetListIndex
         )
+      }
+    }
+    case "MOVE_LIST": {
+      const { dragIndex, hoverIndex } = action.payload
+      return {
+        ...state,
+        lists: moveItem(state.lists, dragIndex, hoverIndex)
       }
     }
     default: {

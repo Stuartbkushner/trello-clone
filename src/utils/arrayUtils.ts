@@ -6,6 +6,15 @@ export const findItemIndexById = <T extends Item>(items: T[], id: string) => {
   return items.findIndex((item: T) => item.id === id)
 }
 
+export const moveItem = <T>(array: T[], from: number, to: number) => {
+  const item = array[from]
+  return insertItemAtIndex(removeItemAtIndex(array, from), item, to)
+}
+
+export function removeItemAtIndex<T>(array: T[], index: number) {
+  return [...array.slice(0, index), ...array.slice(index + 1)]
+}
+
 export function overrideItemAtIndex<T>(
   array: T[],
   newItem: T,
