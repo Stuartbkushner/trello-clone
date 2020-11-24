@@ -1,10 +1,7 @@
 import React, { createContext, useReducer, useContext } from "react"
 import { nanoid } from "nanoid"
-import {
-  overrideItemAtIndex,
-  findItemIndexById,
-  moveItem
-} from "./utils/arrayUtils"
+import { findItemIndexById, overrideItemAtIndex, moveItem } from "./utils/arrayUtils"
+import { DragItem } from "./DragItem"
 
 interface Task {
   id: string
@@ -19,9 +16,14 @@ interface List {
 
 export interface AppState {
   lists: List[]
+  draggedItem: DragItem | undefined;
 }
 
 type Action =
+  | {
+      type: "SET_DRAGGED_ITEM"
+      payload: DragItem | undefined
+    }
   | {
       type: "ADD_LIST"
       payload: string
@@ -43,12 +45,13 @@ interface AppStateContextProps {
   dispatch: React.Dispatch<Action>
 }
 
-const AppStateContext = createContext<AppStateContextProps>(
-  {} as AppStateContextProps
-)
+const AppStateContext = createContext<AppStateContextProps>({} as AppStateContextProps)
 
-const appStateReducer = (state: AppState, action: any): AppState => {
+const appStateReducer = (state: AppState, action: Action): AppState => {
   switch (action.type) {
+    case "SET_DRAGGED_ITEM": {
+      return { ...state, draggedItem: action.payload }
+    }
     case "ADD_LIST": {
       return {
         ...state,
@@ -73,6 +76,7 @@ const appStateReducer = (state: AppState, action: any): AppState => {
           { id: nanoid(), text: action.payload.text }
         ]
       }
+
       return {
         ...state,
         lists: overrideItemAtIndex(
@@ -95,7 +99,8 @@ const appStateReducer = (state: AppState, action: any): AppState => {
   }
 }
 
-const appData: AppState = {
+const appData: AppState= {
+  draggedItem: undefined,
   lists: [
     {
       id: "0",
