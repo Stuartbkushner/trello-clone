@@ -8,10 +8,9 @@ interface ColumnProps {
   index: number
 }
 
-export const Column = ({
-  text,
-  children
-}: React.PropsWithChildren<ColumnProps>) => {
+export const Column = ({ text,index}: ColumnProps) => {
+  const { state } = useAppState()
+
   return (
     <ColumnContainer>
       <ColumnTitle>{text}</ColumnTitle>
