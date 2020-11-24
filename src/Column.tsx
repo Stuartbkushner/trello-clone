@@ -5,10 +5,10 @@ interface ColumnProps {
   text: string
 }
 
-export const Column = () => {
+export const Column = ({ text }: ColumnProps) => {
   return (
     <ColumnContainer>
-      <ColumnTitle>{Text}</ColumnTitle>
+      <ColumnTitle>{text}</ColumnTitle>
     </ColumnContainer>
   )
 }
