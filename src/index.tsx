@@ -10,7 +10,7 @@ ReactDOM.render(
   <DndProvider backend={Backend}>
     <AppStateProvider>
       <App />
-    </AppStateProvider>,
+    </AppStateProvider>
   </DndProvider>,
   document.getElementById("root")
 )
