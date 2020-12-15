@@ -1,9 +1,13 @@
-import React, { createContext, useReducer, useContext, useEffect } from "react"
+import React, { createContext, useReducer, useContext } from "react"
 import { nanoid } from "nanoid"
-import { findItemIndexById, insertItemAtIndex, moveItem, overrideItemAtIndex, removeItemAtIndex } from "./utils/arrayUtils"
 import { DragItem } from "./DragItem"
-import { withData } from "./withData"
-import { save } from "./api"
+import {
+  insertItemAtIndex,
+  overrideItemAtIndex,
+  removeItemAtIndex,
+  findItemIndexById,
+  moveItem
+} from "./utils/arrayUtils"
 
 interface Task {
   id: string
@@ -60,7 +64,10 @@ const AppStateContext = createContext<AppStateContextProps>(
   {} as AppStateContextProps
 )
 
-const appStateReducer = (state: AppState, action: Action): AppState => {
+const appStateReducer = (
+  state: AppState,
+  action: Action
+): AppState => {
   switch (action.type) {
     case "SET_DRAGGED_ITEM": {
       return { ...state, draggedItem: action.payload }
@@ -164,21 +171,38 @@ const appStateReducer = (state: AppState, action: Action): AppState => {
   }
 }
 
-export const AppStateProvider = withData(({ children, initialState }: React.PropsWithChildren<{initialState: AppState}>) => {
-  const [state, dispatch] = useReducer(appStateReducer, initialState)
+const appData: AppState = {
+  draggedItem: undefined,
+  lists: [
+    {
+      id: "0",
+      text: "To Do",
+      tasks: [{ id: "c0", text: "Generate app scaffold" }]
+    },
+    {
+      id: "1",
+      text: "In Progress",
+      tasks: [{ id: "c2", text: "Learn Typescript" }]
+    },
+    {
+      id: "2",
+      text: "Done",
+      tasks: [{ id: "c3", text: "Begin to use static typing" }]
+    }
+  ]
+}
 
-  useEffect(() => {
-    save(state)
-  }, [state])
+export const AppStateProvider = ({
+  children
+}: React.PropsWithChildren<{}>) => {
+  const [state, dispatch] = useReducer(appStateReducer, appData)
 
   return (
-    <AppStateContext.Provider
-      value={{ state, dispatch }}
-    >
+    <AppStateContext.Provider value={{ state, dispatch }}>
       {children}
     </AppStateContext.Provider>
   )
-})
+}
 
 export const useAppState = () => {
   return useContext(AppStateContext)
